@@ -1,0 +1,180 @@
+ _______  _______  __    _  _______  ______    _______  ___     
+|       ||       ||  |  | ||       ||    _ |  |   _   ||   |    
+|    ___||    ___||   |_| ||    ___||   | ||  |  |_|  ||   |    
+|   | __ |   |___ |       ||   |___ |   |_||_ |       ||   |    
+|   ||  ||    ___||  _    ||    ___||    __  ||       ||   |___ 
+|   |_| ||   |___ | | |   ||   |___ |   |  | ||   _   ||       |
+|_______||_______||_|  |__||_______||___|  |_||__| |__||_______|
+
+The cool text things are made with 
+(Big: //7 lines
+https://patorjk.com/software/taag/#p=display&f=Modular&t=Input
+Medium: //5 lines
+https://patorjk.com/software/taag/#p=display&f=ANSI%20Regular&t=Input
+Small: //3 lines
+https://patorjk.com/software/taag/#p=display&f=Calvin%20S&t=Input
+)
+These are specifically to be used for the start of important functions in long files so that they can be easily located by scrolling and scanning. Please add them wherever it makes sense to do so.
+
+IMPORTANT NOTE FOR NEWCOMERS: All scripts use a shared state, so declare all vars "local" unless they are necessary for access elsewhere/everywhere/publicly and do not use generalized public varnames, try to keep those vars as specific as possible, and prefix each public varname with _filename_ where filename is the name of the Lua file it is declared in to avoid varname clashes thanks :)
+
+
+Int APIs and helper functions:
+Loading:
+msg.post("/loading#script", "start", {includeProgress = true})
+msg.post("/loading#script", "progress", {progress = 0.3}) where 0.3 is in range (0,1) and corresponds to how filled in the loading progress will be
+msg.post("/loading#script", "stop")
+msg.post("/loading#script", "reason", {reason = "Connecting to server"}) update the "reason" text (invisible by default until this is sent)
+
+
+Random:
+random() -> float in range (0,1) exclusive
+random(5) -> int in range (0,5) inclusive
+random(2,5) -> int in range (2,5) inclusive
+boolean() -> 50% true 50% false
+randombig() -> a large int
+percent(2) -> 2% true 98% false
+
+General:
+s(4) -> '4' (stringify)
+
+
+ _______  _______  _______  __    _  ______   _______  ______    ______   _______ 
+|       ||       ||   _   ||  |  | ||      | |   _   ||    _ |  |      | |       |
+|  _____||_     _||  |_|  ||   |_| ||  _    ||  |_|  ||   | ||  |  _    ||  _____|
+| |_____   |   |  |       ||       || | |   ||       ||   |_||_ | | |   || |_____ 
+|_____  |  |   |  |       ||  _    || |_|   ||       ||    __  || |_|   ||_____  |
+ _____| |  |   |  |   _   || | |   ||       ||   _   ||   |  | ||       | _____| |
+|_______|  |___|  |__| |__||_|  |__||______| |__| |__||___|  |_||______| |_______|
+
+-tabs
+-no alignment
+-use distance field fonts instead of bitmap (change materials too from default to "-df.material" version)
+-keep main.collection empty besides loading other collections
+-name all children of game objects which aren't game objects and are the only one of the type that type itself
+-for testing or experimenting, never pollute the real collections, keep all that solely to test.collection and switch the game.project Main Collection to test.collection for those purposes
+-always set all GUI nodes to Adjust mode: Zoom in properties panel
+ _______  __   __  _______  _______  __    _  _______  ___   _______  __    _  _______ 
+|       ||  |_|  ||       ||       ||  |  | ||       ||   | |       ||  |  | ||       |
+|    ___||       ||_     _||    ___||   |_| ||  _____||   | |   _   ||   |_| ||  _____|
+|   |___ |       |  |   |  |   |___ |       || |_____ |   | |  | |  ||       || |_____ 
+|    ___| |     |   |   |  |    ___||  _    ||_____  ||   | |  |_|  ||  _    ||_____  |
+|   |___ |   _   |  |   |  |   |___ | | |   | _____| ||   | |       || | |   | _____| |
+|_______||__| |__|  |___|  |_______||_|  |__||_______||___| |_______||_|  |__||_______|
+
+For rendering, we use defold-orthographic by default. This is only valid for 2d games. Docs here https://github.com/britzl/defold-orthographic
+
+For UI extension and localization, we use Druid. Docs here: https://github.com/Insality/druid
+For JSON, we use an extension which does not work on linux: https://github.com/Melsoft-Games/defold-cjson
+For OS info and features, we use Defos. Docs: https://github.com/subsoap/defos/releases
+
+For Achievements, Friends, Matchmaking etc on Steam, we use Steamworks. For projects without need for Steam features, remove it. Docs: https://github.com/britzl/steamworks-defold
+
+For allowing the user to share data to someone else (for example telling them about the game), we use the defold native share plugin docs https://github.com/britzl/defold-sharing
+
+For loading images from file to buffer, try https://github.com/Lerg/extension-imageloader, although it may be broken
+
+For clipboard functions, accessing copy/paste, we use https://github.com/britzl/defold-clipboard/
+
+For Discord Rich Presence, we use https://github.com/subsoap/discordrich which uses snake_case variant of https://discord.com/developers/docs/rich-presence/how-to#updating-presence-update-presence-payload-fields
+
+For table operations we use https://github.com/BobG1983/DefTable
+
+For a simple timer for speed running or countdowns, use https://github.com/klaytonkowalski/defold-timer
+
+For when a dynamic map or projection such as space powerplay map is necessary, use the NOT YET IMPLEMENTED https://github.com/JCash/defold-voronoi
+
+For QR code logins, use https://github.com/defold/extension-qrcode/
+
+For complex styled text, use https://github.com/britzl/defold-richtext
+
+ ___   __    _    _______  _______  _______  _______    _______  _______ 
+|   | |  |  | |  |       ||   _   ||       ||       |  |       ||       |
+|   | |   |_| |  |       ||  |_|  ||  _____||    ___|  |   _   ||    ___|
+|   | |       |  |       ||       || |_____ |   |___   |  | |  ||   |___ 
+|   | |  _    |  |      _||       ||_____  ||    ___|  |  |_|  ||    ___|
+|   | | | |   |  |     |_ |   _   | _____| ||   |___   |       ||   |    
+|___| |_|  |__|  |_______||__| |__||_______||_______|  |_______||___|    
+
+If 2d game is vector instead of pixel, in game.project change all "subpixels" options to checked and make the rendering method "linear" instead of "nearest"
+If game is 3d then remove refold-orthographic and instead add scene3d, Operator, Defold-illumination, Kinematic Walker, and TrenchBroom
+https://github.com/indiesoftby/defold-scene3d (3d primitives as .buffer, Frustum culling, helper 3d math functions, skybox)
+https://github.com/indiesoftby/defold-scene3d/tree/main/scene3d/assets/meshes
+https://github.com/astrochili/defold-operator ()
+https://github.com/astrochili/defold-illumination (3d vox, fog, ambient lighting, directional lighting)
+https://github.com/astrochili/defold-kinematic-walker
+https://github.com/astrochili/defold-trenchbroom
+Needed table modification funcs that don't exist natively, use https://github.com/BobG1983/DefTable
+Needed string modification funcs that don't exist natively, use https://github.com/subsoap/defstring
+An .ogg sound file that needs to be played, use resource.load(abc.ogg) as you would with a wav and run `decodeogg.decodeogg(res)` where res is the name of the variable the resource was loaded to
+
+Extra deets:
+
+
+
+Add Discord Rich Presence with:
+1. Make app at https://discord.com/developers/applications
+2. Obtain discord_client_id which will look like "8674960145089348561"
+3. Add to config.script "discordrich.initialize(your_discord_client_id)"
+4. Add the following code block wherever the content of the rich presence should be changed:
+```lua
+discordrich.update_presence({
+  status = "My status",
+  details = "Doing something important in-game",
+})
+```
+
+Clipboard:
+clipboard.copy(String text) 
+clipboard.paste() --> returns string
+
+Helpful Sharing:
+share.text(String text)
+
+JSON:
+cjson.encode(lua_table)
+cjson.decode(valid_json_string)
+
+Helpful steamworks:
+steamworks.user_stats_set_achievement (https://partner.steamgames.com/doc/api/ISteamUserStats#SetAchievement)
+
+
+
+steamworks.utils_get_steam_ui_language
+steamworks.matchmaking_get_favorite_game
+steamworks.utils_get_current_battery_power
+steamworks.utils_get_ip_country
+steamworks.remote_storage_file_write
+steamworks.remote_storage_file_read
+steamworks.remote_storage_file_write_async
+steamworks.remote_storage_file_write_stream_open
+steamworks.remote_storage_file_write_stream_write_chunk
+steamworks.remote_storage_file_write_stream_close
+steamworks.remote_storage_file_write_stream_cancel
+steamworks.remote_storage_file_exists
+steamworks.remote_storage_get_file_size
+
+
+OPTIONAL MODULES FOR ADDITIONAL FUNCTIONALITY:
+Easy no-setup RPG dialogue (Celeste style) with features https://github.com/Insality/defold-printer
+Dynamic 2d guided GOs on invis paths with graphs https://github.com/dev-masih/defgraph
+For full file access, use https://github.com/britzl/defold-lfs
+
+
+
+
+
+
+test
+<>!!!dependencies#0 = https://github.com/britzl/defold-orthographic/archive/refs/tags/3.2.0.zip
+dependencies#1 = https://github.com/Insality/druid/archive/refs/tags/0.9.0.zip
+<>!!!dependencies#2 = https://github.com/subsoap/defos/archive/refs/tags/v.2.7.0.zip
+>!!!dependencies#3 = https://github.com/britzl/steamworks-defold/archive/refs/tags/2.0.3.zip
+dependencies#4 = https://github.com/britzl/defold-sharing/archive/refs/tags/4.2.0.zip
+!dependencies#5 = https://github.com/Melsoft-Games/defold-cjson/archive/master.zip
+dependencies#6 = https://github.com/Lerg/extension-directories/archive/master.zip
+dependencies#7 = https://github.com/britzl/defold-clipboard/archive/refs/tags/1.3.0.zip
+!dependencies#8 = https://github.com/ShriekBob/DefTable/archive/master.zip
+!dependencies#9 = https://github.com/subsoap/defstring/archive/master.zip
+dependencies#10 = https://github.com/britzl/defold-richtext/archive/refs/tags/5.17.0.zip
+!!!dependencies#11 = https://github.com/subsoap/discordrich/archive/v1.0.5.zip
