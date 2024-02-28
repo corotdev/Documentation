@@ -34,7 +34,11 @@ loading
 <dt><code>message.loading</code></dt>
 <dd>the loading feature is a single non-instantiated loading screen which covers the whole screen and has the capability of displaying the progress level or not.</dd>
 
-
+Collection|Receiver|Message|Parameters
+:-:|-|-|-
+default:/collection0|/loading#script|start|boolean `includeProgress` (whether or not to include a progress indicator)
+default:/collection0|/loading#script|progress|float `progress` in range (0,1) (what portion to set as "filled" if `includeProgress` is true)
+default:/collection0|/loading#script|stop|
 
 <!--start of definition and subsubsection-->
 ### <font color=orange>start</font> <!--header-->
@@ -56,12 +60,10 @@ msg.post("/loading#script", "start", {includeProgress = true})
 
 
 
-<!--start of definition and subsubsection-->
-### <font color=orange>progress</font>
+<!--start of definition and subsubsection-->### <font color=orange>progress</font>
 <font style="opacity: 0 !important;line-height: 0px;"><dt><code>loading.progress</code></dt><br></font><!--This is the API link for this definition-->
 `msg.post("/loading#script", "progress", {`<code>progress</code>`})`<br><br>
-Sets the `progress` of the `message.loading` screen, provided that `loading.start` was called with `includeProgress` set to true. The provided value `progress can be any number from `0` to `1`, where `0` is an empty loading bar and `1` is a full loading bar.
-<br><br>__PARAMETERS__<br>
+Sets the `progress` of the `message.loading` screen, provided that `loading.start` was called with `includeProgress` set to true. The provided value `progress can be any number from `0` to `1`, where `0` is an empty loading bar and `1` is a full loading bar.<br><br>__PARAMETERS__<br>
 Name|Type|Usage|Constraints
 -|:-:|-|-
 <dt><code>progress</code></dt>|`number`|displayed progress|`range(0,1)`
@@ -70,23 +72,59 @@ Set the progress to 0.3 (3/10s loaded)
 ```
 msg.post("/loading#script", "progress", {progress = 0.3})
 ```
-<br>
+<br><!--end of definition and subsubsection-->
+
+
+
+### <font color=orange>stop</font> <!--header-->
+<font style="opacity: 0 !important;line-height: 0px;"><dt><code>loading.stop</code></dt><br></font><!--This is the API link for this definition-->
+`msg.post("/loading#script", "stop")`<br><br><!--this is the quickhand cheat sheet example-->
+<!--start description-->Concludes and closes the standard loading screen process. Animates out smoothly unless devmode is active, so the screen will not immediately be fully revealed.<!--end description-->
+<example><div class="exampleheader"><br><br>__EXAMPLE__<br><br></div><!--example header-->
+Close the loading screen<!--example description-->
+```
+msg.post("/loading#script", "stop")
+```
+</example><br>
 <!--end of definition and subsubsection-->
 
 
 
+__SECTION EXAMPLE__
 
-msg.post("/loading#script", "start", {includeProgress = true})
-msg.post("/loading#script", "progress", {progress = 0.3}) where 0.3 is in range (0,1) and corresponds to how filled in the loading progress will be
-msg.post("/loading#script", "stop")
-msg.post("/loading#script", "reason", {reason = "Connecting to server"}) update the "reason" text (invisible by default until this is sent)
+`msg.post("/loading#script", "start", {`<code>includeProgress</code>` = true})`<br>
+`msg.post("/loading#script", "progress", {`<code>progress</code>` = 0.3}) --where 0.3 is in range (0,1) and corresponds to how filled in the loading progress will be`<br>
+`msg.post("/loading#script", "stop")`<br>
+`msg.post("/loading#script", "reason", {`<code>reason</code>` = "Connecting to server"}) --update the "reason" text (invisible by default until this is sent)`
 
-Collection|Receiver|Message|Description|Params
-:-:|-|-|-
-main|/loading#script|start|boolean `includeProgress` (whether or not to include a progress indicator)
-main|/loading#script|progress|float `progress` in range (0,1) (what portion to set as "filled" if `includeProgress` is true)
-main|/loading#script|stop
 
+
+Functions
+===
+
+http
+---
+
+<!--start of definition and subsubsection-->### <font color=orange>get</font>
+<font style="opacity: 0 !important;line-height: 0px;"><dt><code>http_get</code></dt><br></font><!--This is the API link for this definition-->
+`http_get("https://docs.corot.dev/docs.md.html", callbackFunction)`<br><br>
+Performs a simple HTTP GET request and returns the response text only by calling the callback function when and if a response is received.<br><br>__PARAMETERS__<br>
+Name|Type|Usage|Constraints
+-|:-:|-|-
+url|`string`|the url to make the GET request to|`google.com`
+callback|`function`|the function to return the value to|must be accessible in scope
+<br><br>__EXAMPLE__<br><br>
+Returns the raw HTML of this page
+```
+http_get("https://docs.corot.dev/docs.md.html", callbackFunction)
+```
+<br><!--end of definition and subsubsection-->
+
+### <font color=orange>start</font>
+
+### <font color=orange>start</font>
+
+### <font color=orange>start</font>
 
  and helper functions:
 Random:
