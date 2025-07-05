@@ -1,0 +1,283 @@
+<meta charset="utf-8" emacsmode="-*- markdown -*-" /><link
+	rel="stylesheet"
+	href="https://casual-effects.com/markdeep/latest/slate.css?"
+/>
+<meta lang="sv" />
+<script>
+	window.markdeepOptions = {
+		mode: "markdeep",
+		tocStyle: "long",
+		autoLinkImages: false,
+		definitionStyle: "long",
+		detectMath: false,
+		showLabels: false,
+		hideEmptyWeekends: false,
+		sortScheduleLists: false,
+		linkAPIDefinitions: true,
+		inlineCodeLang: "Lua",
+		smartQuotes: false,
+	};
+</script>
+
+**Corot Core Docs** Version 0.x Corot Core Docs Conventions === In-script
+headers --- Unfortunately, you cannot use markdown inside of script files. As an
+alternative, in large script files, to create "headers" which are useful for
+anchoring and finding where the function starts or ends, do this: (Big: //7
+lines https://patorjk.com/software/taag/#p=display&f=Modular&t=Input Medium: //5
+lines https://patorjk.com/software/taag/#p=display&f=ANSI%20Regular&t=Input
+Small: //3 lines
+https://patorjk.com/software/taag/#p=display&f=Calvin%20S&t=Input ) These are
+specifically to be used for the start of important functions in long files so
+that they can be easily located by scrolling and scanning. Please add them
+wherever it makes sense to do so. Shared state --- To reduce the complexity
+caused by modular exports, all scripts use a shared state. This is extremely
+beneficial because it makes reusing variables between files easy as breathing,
+and removes some message-passing overhead, but it has a __very important
+implication__:
+<br />Any variable declared anywhere, no matter how temporary or unimportant, is
+accessible for all files by default, which WILL cause name collisions, which are
+NOT picked up by the Lua compiler (Yes, Lua is compiled. It is compiled by an
+interpreter to bytecode. Don't believe the fools online who say otherwise). This
+makes it __absolutely mandatory__ to declare all vars "local" unless they are
+necessary for access elsewhere/everywhere/publicly and never use generalized
+public varnames, try to keep those vars as specific as possible, and prefix each
+public varname with _filename_ where filename is the name of the Lua file it is
+declared in to avoid varname clashes thanks :) (these are also good standards to
+write usable code in general) Messages === loading ---
+<dt><code>message.loading</code></dt>
+<dd>
+	the loading feature is a single non-instantiated loading screen which covers
+	the whole screen and has the capability of displaying the progress level or
+	not.
+</dd>
+
+Collection|Receiver|Message|Parameters :-:|-|-|-
+default:/collection0|/loading#script|start|boolean `includeProgress` (whether or
+not to include a progress indicator)
+default:/collection0|/loading#script|progress|float `progress` in range (0,1)
+(what portion to set as "filled" if `includeProgress` is true)
+default:/collection0|/loading#script|stop|
+
+<!--start of definition and subsubsection-->
+### <font color="orange">start</font>
+<!--header-->
+<font style="opacity: 0 !important; line-height: 0px"
+	><dt><code>loading.start</code></dt>
+	<br /></font
+><!--This is the API link for this definition-->
+`msg.post("/loading#script", "start", {`<code>includeProgress</code>`})`<br /><br /><!--this is the quickhand cheat sheet example-->
+<!--start description-->Initiates the standard loading screen process. Animates
+in smoothly, so the screen will not immediately be fully covered. Pass a boolean
+to `includeProgress` to indicate whether or not this feature is desired or
+necessary.<!--end description-->
+<parameters><br /><br />__PARAMETERS__<br /></parameters
+><!--parameter table header-->
+<div class="paramtable">
+	Name|Type|Usage|Constraints -|:-:|-|-
+	<dt><code>includeProgress</code></dt>
+	|`boolean`|include a progress indicator|`true`, `false`
+</div>
+<example
+	><div class="exampleheader"><br /><br />__EXAMPLE__<br /><br /></div>
+	<!--example header-->
+	Activate the loading screen, with a progress indicator visible<!--example description-->
+	``` msg.post("/loading#script", "start", {includeProgress = true}) ``` </example
+><br />
+<!--end of definition and subsubsection-->
+
+<!--start of definition and subsubsection-->###
+<font color="orange">progress</font>
+<font style="opacity: 0 !important; line-height: 0px"
+	><dt><code>loading.progress</code></dt>
+	<br /></font
+><!--This is the API link for this definition-->
+`msg.post("/loading#script", "progress", {`<code>progress</code>`})`<br /><br />
+Sets the `progress` of the `message.loading` screen, provided that
+`loading.start` was called with `includeProgress` set to true. The provided
+value `progress can be any number from `0` to `1`, where `0` is an empty loading
+bar and `1` is a full loading bar.<br /><br />__PARAMETERS__<br />
+Name|Type|Usage|Constraints -|:-:|-|-
+<dt><code>progress</code></dt>
+|`number`|displayed progress|`range(0,1)` <br /><br />__EXAMPLE__<br /><br />
+Set the progress to 0.3 (3/10s loaded) ``` msg.post("/loading#script",
+"progress", {progress = 0.3}) ```
+<br /><!--end of definition and subsubsection-->
+
+### <font color="orange">stop</font>
+<!--header-->
+<font style="opacity: 0 !important; line-height: 0px"
+	><dt><code>loading.stop</code></dt>
+	<br /></font
+><!--This is the API link for this definition-->
+`msg.post("/loading#script", "stop")`<br /><br /><!--this is the quickhand cheat sheet example-->
+<!--start description-->Concludes and closes the standard loading screen
+process. Animates out smoothly unless devmode is active, so the screen will not
+immediately be fully revealed.<!--end description-->
+<example
+	><div class="exampleheader"><br /><br />__EXAMPLE__<br /><br /></div>
+	<!--example header-->
+	Close the loading screen<!--example description-->
+	``` msg.post("/loading#script", "stop") ``` </example
+><br />
+<!--end of definition and subsubsection-->
+
+__SECTION EXAMPLE__ `msg.post("/loading#script", "start",
+{`<code>includeProgress</code>` = true})`<br />
+`msg.post("/loading#script", "progress", {`<code>progress</code>` = 0.3})
+--where 0.3 is in range (0,1) and corresponds to how filled in the loading
+progress will be`<br />
+`msg.post("/loading#script", "stop")`<br />
+`msg.post("/loading#script", "reason", {`<code>reason</code>` = "Connecting to
+server"}) --update the "reason" text (invisible by default until this is sent)`
+Functions === http ---
+
+<!--start of definition and subsubsection-->### <font color="orange">get</font>
+<font style="opacity: 0 !important; line-height: 0px"
+	><dt><code>http_get</code></dt>
+	<br /></font
+><!--This is the API link for this definition-->
+`http_get("https://docs.corot.dev/docs.md.html", callbackFunction)`<br /><br />
+Performs a simple HTTP GET request and returns the response text only by calling
+the callback function when and if a response is received.<br /><br />__PARAMETERS__<br />
+Name|Type|Usage|Constraints -|:-:|-|- url|`string`|the url to make the GET
+request to|`google.com` callback|`function`|the function to return the value
+to|must be accessible in scope
+<br /><br />__EXAMPLE__<br /><br />
+Returns the raw HTML of this page ```
+http_get("https://docs.corot.dev/docs.md.html", callbackFunction) ```
+<br /><!--end of definition and subsubsection-->
+
+### <font color="orange">start</font>
+
+### <font color="orange">start</font>
+
+### <font color="orange">start</font>
+
+and helper functions: Random: random() -> float in range (0,1) exclusive
+random(5) -> int in range (0,5) inclusive random(2,5) -> int in range (2,5)
+inclusive boolean() -> 50% true 50% false randombig() -> a large int percent(2)
+-> 2% true 98% false General: s(4) -> '4' (stringify) HTTP: ``` _______ _______
+_______ __ _ ______ _______ ______ ______ _______ | || || _ || | | || | | _ || _
+| | | | | | _____||_ _|| |_| || |_| || _ || |_| || | || | _ || _____| | |_____ |
+| | || || | | || || |_||_ | | | || |_____ |_____ | | | | || _ || |_| || || __ ||
+|_| ||_____ | _____| | | | | _ || | | || || _ || | | || | _____| | |_______|
+|___| |__| |__||_| |__||______| |__| |__||___| |_||______| |_______| ``` -tabs
+-no alignment -use distance field fonts instead of bitmap (change materials too
+from default to "-df.material" version) -keep main.collection empty besides
+loading other collections -name all children of game objects which aren't game
+objects and are the only one of the type that type itself -for testing or
+experimenting, never pollute the real collections, keep all that solely to
+test.collection and switch the game.project Main Collection to test.collection
+for those purposes -always set all GUI nodes to Adjust mode: Zoom in properties
+panel ``` _______ __ __ _______ _______ __ _ _______ ___ _______ __ _ _______ |
+|| |_| || || || | | || || | | || | | || | | ___|| ||_ _|| ___|| |_| || _____|| |
+| _ || |_| || _____| | |___ | | | | | |___ | || |_____ | | | | | || || |_____ |
+___| | | | | | ___|| _ ||_____ || | | |_| || _ ||_____ | | |___ | _ | | | | |___
+| | | | _____| || | | || | | | _____| | |_______||__| |__| |___| |_______||_|
+|__||_______||___| |_______||_| |__||_______| ``` For rendering, we use
+defold-orthographic by default. This is only valid for 2d games. Docs here
+https://github.com/britzl/defold-orthographic For UI extension and localization,
+we use Druid. Docs here: https://github.com/Insality/druid For JSON, we use an
+extension which does not work on linux:
+https://github.com/Melsoft-Games/defold-cjson For OS info and features, we use
+Defos. Docs: https://github.com/subsoap/defos/releases For Achievements,
+Friends, Matchmaking etc on Steam, we use Steamworks. For projects without need
+for Steam features, remove it. Docs: https://github.com/britzl/steamworks-defold
+For allowing the user to share data to someone else (for example telling them
+about the game), we use the defold native share plugin docs
+https://github.com/britzl/defold-sharing For loading images from file to buffer,
+try https://github.com/Lerg/extension-imageloader, although it may be broken For
+clipboard functions, accessing copy/paste, we use
+https://github.com/britzl/defold-clipboard/ For Discord Rich Presence, we use
+https://github.com/subsoap/discordrich which uses snake_case variant of
+https://discord.com/developers/docs/rich-presence/how-to#updating-presence-update-presence-payload-fields
+For table operations we use https://github.com/BobG1983/DefTable For a simple
+timer for speed running or countdowns, use
+https://github.com/klaytonkowalski/defold-timer For when a dynamic map or
+projection such as space powerplay map is necessary, use the NOT YET IMPLEMENTED
+https://github.com/JCash/defold-voronoi For QR code logins, use
+https://github.com/defold/extension-qrcode/ For complex styled text, use
+https://github.com/britzl/defold-richtext ``` ___ __ _ _______ _______ _______
+_______ _______ _______ | | | | | | | || _ || || | | || | | | | |_| | | || |_|
+|| _____|| ___| | _ || ___| | | | | | || || |_____ | |___ | | | || |___ | | | _
+| | _|| ||_____ || ___| | |_| || ___| | | | | | | | |_ | _ | _____| || |___ | ||
+| |___| |_| |__| |_______||__| |__||_______||_______| |_______||___| ``` If 2d
+game is vector instead of pixel, in game.project change all "subpixels" options
+to checked and make the rendering method "linear" instead of "nearest" If game
+is 3d then remove refold-orthographic and instead add scene3d, Operator,
+Defold-illumination, Kinematic Walker, and TrenchBroom
+https://github.com/indiesoftby/defold-scene3d (3d primitives as .buffer, Frustum
+culling, helper 3d math functions, skybox)
+https://github.com/indiesoftby/defold-scene3d/tree/main/scene3d/assets/meshes
+https://github.com/astrochili/defold-operator ()
+https://github.com/astrochili/defold-illumination (3d vox, fog, ambient
+lighting, directional lighting)
+https://github.com/astrochili/defold-kinematic-walker
+https://github.com/astrochili/defold-trenchbroom Needed table modification funcs
+that don't exist natively, use https://github.com/BobG1983/DefTable Needed
+string modification funcs that don't exist natively, use
+https://github.com/subsoap/defstring An .ogg sound file that needs to be played,
+use resource.load(abc.ogg) as you would with a wav and run
+`decodeogg.decodeogg(res)` where res is the name of the variable the resource
+was loaded to Extra deets: Add Discord Rich Presence with: 1. Make app at
+https://discord.com/developers/applications 2. Obtain discord_client_id which
+will look like "8674960145089348561" 3. Add to config.script
+"discordrich.initialize(your_discord_client_id)" 4. Add the following code block
+wherever the content of the rich presence should be changed: ```lua
+discordrich.update_presence({ status = "My status", details = "Doing something
+important in-game", }) ``` Clipboard: clipboard.copy(String text)
+clipboard.paste() --> returns string Helpful Sharing: share.text(String text)
+JSON: cjson.encode(lua_table) cjson.decode(valid_json_string) Helpful
+steamworks: steamworks.user_stats_set_achievement
+(https://partner.steamgames.com/doc/api/ISteamUserStats#SetAchievement)
+steamworks.utils_get_steam_ui_language steamworks.matchmaking_get_favorite_game
+steamworks.utils_get_current_battery_power steamworks.utils_get_ip_country
+steamworks.remote_storage_file_write steamworks.remote_storage_file_read
+steamworks.remote_storage_file_write_async
+steamworks.remote_storage_file_write_stream_open
+steamworks.remote_storage_file_write_stream_write_chunk
+steamworks.remote_storage_file_write_stream_close
+steamworks.remote_storage_file_write_stream_cancel
+steamworks.remote_storage_file_exists steamworks.remote_storage_get_file_size
+OPTIONAL MODULES FOR ADDITIONAL FUNCTIONALITY: Easy no-setup RPG dialogue
+(Celeste style) with features https://github.com/Insality/defold-printer Dynamic
+2d guided GOs on invis paths with graphs https://github.com/dev-masih/defgraph
+For full file access, use https://github.com/britzl/defold-lfs Markdeep guide
+============================================================== table: Maine |
+Iowa | Colorado -------|------|---------- 1 | 4 | 10 ME | IA | CO Blue | Red |
+Brown [Table [states]: Caption with label.] Subsubheading: ### Exporters
+<ul>
+	: - Incididunt - Bonus Unum - Quibusdam Language ambiguous code block:
+	``````````````````````````````````````````````` count_lines () { local f=$1
+	local m m=`wc -l $f | sed 's/^\([0-9]*\).*$/\1/'` return $m }
+	``````````````````````````````````````````````` subheader: Procedural
+	-------------------------------------------------------------- Single line
+	code block: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ a long preformatted
+	code block a long preformatted code block a long preformatted code block a
+	long preformatted code block a long preformatted code block
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ header: Modules === header's body
+	Code block: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ rust fn main() {
+	let x = 5u32; let y = { let x_squared = x * x; let x_cube = x_squared * x;
+	// This expression will be assigned to `y` x_cube + x_squared + x }; let z =
+	{ // The semicolon suppresses this expression and `()` is assigned to `z` 2
+	* x; }; println!("x is {:?}", x); println!("y is {:?}", y); println!("z is
+	{:?}", z); } ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Img w caption:
+	![`a long code caption a long code caption`](robot.jpg) ![`a long code
+	caption`](robot.jpg) ![`a long code caption`](robot.jpg) ![`a long code
+	caption`](robot.jpg) ![`a long code caption a long code caption`](robot.jpg)
+	![`a long code caption`](robot.jpg) ![`a long code caption`](robot.jpg) ![`a
+	long code caption`](robot.jpg) Section separator:
+	============================================================== Link: [Link
+	to nowhere](nowhere).
+
+	<style class="fallback">
+		body {
+			visibility: hidden;
+		}
+	</style>
+	<!-- Markdeep: -->
+	<script
+		src="https://casual-effects.com/markdeep/latest/markdeep.min.js?"
+		charset="utf-8"
+	></script>
+</ul>
