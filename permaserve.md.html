@@ -1,20 +1,14 @@
-<meta charset="utf-8" emacsmode="-*- markdown -*-" /><link
-	rel="stylesheet"
-	href="https://casual-effects.com/markdeep/latest/slate.css?"
-/>
-<meta lang="sv" />
-<script>
-	window.markdeepOptions = {
-		mode: "markdeep",
-		tocStyle: "long",
-		autoLinkImages: false,
-		definitionStyle: "long",
-		detectMath: false,
-		showLabels: false,
-		hideEmptyWeekends: false,
-		sortScheduleLists: false,
-		linkAPIDefinitions: true,
-		inlineCodeLang: "Lua",
-		smartQuotes: false,
-	};
-</script>
+     <meta charset="utf-8" emacsmode="-*- markdown -*-"><link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/apidoc.css?">
+
+                          **Permaserve API**
+
+## Connection protocol
+
+Connect to the active ip **/handshake** and pass as headers the following
+
+* userAgent
+* clientVersion
+* clientBuild
+* username (can be any auth id field, including email or platform id)
+* password (can be password or token)
+
