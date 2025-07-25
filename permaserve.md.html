@@ -1,44 +1,64 @@
-<meta charset="utf-8" emacsmode="-*- markdown -*-" /><link
-	rel="stylesheet"
-	href="https://casual-effects.com/markdeep/latest/apidoc.css?"
-/>
+     <meta charset="utf-8" emacsmode="-*- markdown -*-"><link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/apidoc.css?">
 
-**Permaserve API** ## Connection protocol Connect to the active ip
-**/handshake** and pass as headers the following * userAgent * clientVersion *
-clientBuild * username (can be any auth id field, including email or platform
-id) * password (can be password or token) ## client->server messages ###
-`set_position`
-<div class="admonition note">
-	This message will soon be deprecated in favor of `update`
-</div>
+                          **Permaserve API**
 
-Fields | Required | Type | Description --- | --- | --- | --- target | no |
-string | The id of the entity to update (if empty, will infer "self") x | yes |
-number | The x coordinate of the position y | yes | number | The y coordinate of
-the position z | yes | number | The z coordinate of the position Example ```
-type=setposition x=123 y=456 z=789 ``` ### `update` Fields | Required | Type |
-Description --- | --- | --- | --- target | yes | string | The id of the entity
-to update (if empty, will infer "self") px | no | double (meters) | The ∆x
-change in coordinate of the position py | no | double (meters) | The ∆y change
-in coordinate of the position pz | no | double (meters) | The ∆z change in
-coordinate of the position rx | no | double (deg) | The new rotational position
-around the x axis ry | no | double (deg) | The new rotational position around
-the y axis rz | no | double (deg) | The new rotational position around the z
-axis sx | no | double | The new scale of the entity sy | no | double | The new
-scale of the entity sz | no | double | The new scale of the entity Example ```
-type=setposition target=self x=123 y=456 z=789 ``` ## server->client messages
+## Connection protocol
+
+Connect to the active ip **/handshake** and pass as headers the following
+
+* userAgent
+* clientVersion
+* clientBuild
+* username (can be any auth id field, including email or platform id)
+* password (can be password or token)
+
+## client->server messages
+
+### `set_position`
+     <div class="admonition note">
+     This message will soon be deprecated in favor of `update`
+     </div>
+
+Fields | Required | Type | Description
+--- | --- | --- | ---
+target | no | string | The id of the entity to update (if empty, will infer "self")
+x | yes | number | The x coordinate of the position
+y | yes | number | The y coordinate of the position
+z | yes | number | The z coordinate of the position
+Example
+```
+type=setposition
+x=123
+y=456
+z=789
+```
+
+### `update`
+Fields | Required | Type | Description
+--- | --- | --- | ---
+target | yes | string | The id of the entity to update (if empty, will infer "self")
+px | no | double (meters) | The ∆x change in coordinate of the position
+py | no | double (meters) | The ∆y change in coordinate of the position
+pz | no | double (meters) | The ∆z change in coordinate of the position
+rx | no | double (deg) | The new rotational position around the x axis
+ry | no | double (deg) | The new rotational position around the y axis
+rz | no | double (deg) | The new rotational position around the z axis
+sx | no | double | The new scale of the entity
+sy | no | double | The new scale of the entity
+sz | no | double | The new scale of the entity
+
+Example
+```
+type=setposition
+target=self
+px=123
+py=456
+pz=789
+```
+
+## server->client messages
+
 ### `sync`
 
-<style class="fallback">
-	body {
-		visibility: hidden;
-	}
-</style>
-<script>
-	markdeepOptions = { tocStyle: "medium" };
-</script>
-<!-- Markdeep: -->
-<script
-	src="https://casual-effects.com/markdeep/latest/markdeep.min.js?"
-	charset="utf-8"
-></script>
+<style class="fallback">body{visibility:hidden}</style><script>markdeepOptions={tocStyle:'medium'};</script>
+<!-- Markdeep: --><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>
