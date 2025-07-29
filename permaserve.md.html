@@ -33,6 +33,40 @@ y=456
 z=789
 ```
 
+### `auth`
+     <div class="admonition note">
+     This message is temporarily not checked against the real user database. Extra handling for rejections will need to be added once this is done.
+     </div>
+
+#### Request:
+
+Fields | Required | Type | Description
+--- | --- | --- | ---
+username | yes | string | The username of the account
+password | yes | string | The password of the account
+
+#### Response:
+
+Fields | Type | Description
+--- | --- | --- | ---
+type | "ack" | The message type to differentiate responses from inbound updates
+message | "auth" | The type of message that this response responds to
+authed | boolean | Whether the authentication succeeded or not
+
+
+Example
+```
+type=auth
+username=corotdev
+password=verycarroty
+```
+-->
+```
+type=ack
+message=auth
+authed=false
+```
+
 ### `update`
 Fields | Required | Type | Description
 --- | --- | --- | ---
