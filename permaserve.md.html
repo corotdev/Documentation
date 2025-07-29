@@ -52,6 +52,7 @@ Fields | Type | Description
 type | "ack" | The message type to differentiate responses from inbound updates
 message | "auth" | The type of message that this response responds to
 authed | boolean | Whether the authentication succeeded or not
+auth | uuidv4 | Authtoken for client to remember (sent only if successful, currently has no effect)
 
 
 Example
@@ -65,6 +66,7 @@ password=verycarroty
 type=ack
 message=auth
 authed=false
+auth=
 ```
 
 ### `update`
