@@ -14,9 +14,9 @@ Connect to the active ip **/handshake** and pass as headers the following
 
 ## client->server messages
 
-### `set_position`
+### `ping`
      <div class="admonition note">
-     This message will soon be deprecated in favor of `update`
+     Not to be confused with server->client ping which is a heartbeat, and expects the client to relay the server's timestamp instead of the other way around.
      </div>
 
 Fields | Required | Type | Description
@@ -32,6 +32,39 @@ x=123
 y=456
 z=789
 ```
+
+### `set_position`
+     <div class="admonition note">
+     This message will soon be deprecated in favor of `update`
+     </div>
+
+#### Request:
+
+Fields | Required | Type | Description
+--- | --- | --- | ---
+target | no | string | The id of the entity to update (if empty, will infer "self")
+x | yes | number | The x coordinate of the position
+y | yes | number | The y coordinate of the position
+z | yes | number | The z coordinate of the position
+
+#### Broadcast:
+
+Fields | Required | Type | Description
+--- | --- | --- | ---
+type | "set_position" |
+gameobject | gameobject | the updated player gameobject
+Example
+```
+type=setposition
+x=123
+y=456
+z=789
+```
+-->
+Global broadcast
+```
+type=set_position
+gameobject=player gameobject
 
 ### `auth`
      <div class="admonition note">
