@@ -22,7 +22,12 @@ Server will respond with one of these responses:
 500 if the login failed but the server should retain the cached auth
 401 if login failed AND the client should prompt the user to re-enter their login
 400 if the client version is outdated and should install the latest update
-
+and if successful, the response body will look like this:
+```
+{
+"token": "6c5f93c9-c25f-4573-8ab0-76e7fbd5a3b4"
+}
+```
 ### Request a token to **/register**
 Send an HTTP request to /auth with the following headers:
 * user-agent (must contain the user application key)
