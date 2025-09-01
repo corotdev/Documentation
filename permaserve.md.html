@@ -4,14 +4,25 @@
 
 ## Connection protocol
 
-Connect to the active ip **/handshake** and pass as headers the following
+### Connect to the active ip **/handshake** and pass as headers the following
 
 * user-agent (must contain the user application key)
 * client-version (the version of the client in the format X.Y where X is the major version and Y is the minor version [patch excluded]))
 * username (will eventually support any auth id field, including email or platform id, for now only supports username)
-* password or token (must pass exactly one of these)
+* token (generate via /auth)
 
-Server will respond 500 if success and 400 if failure. On websocket connection open, server will send token message with
+### Request a token to **/auth**
+Send an HTTP request to /auth with the following headers:
+* user-agent (must contain the user application key)
+* username (will eventually support any auth id field, including email or platform id, for now only supports username)
+* password
+
+Server will respond with one of these responses:
+200 if login is successful
+500 if the login failed but the server should retain the cached auth
+401 if login failed AND the client should prompt the user to re-enter their login
+400 if the client version is outdated and should install the latest update
+On websocket connection open, server will send token message in the format `{"username": "mr_bobson43", "token": "uuid", "expires": timestamp}`, this should be cached immediately.
 
 ## client->server messages
 
