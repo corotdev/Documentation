@@ -22,7 +22,15 @@ Server will respond with one of these responses:
 500 if the login failed but the server should retain the cached auth
 401 if login failed AND the client should prompt the user to re-enter their login
 400 if the client version is outdated and should install the latest update
-On websocket connection open, server will send token message in the format `{"username": "mr_bobson43", "token": "uuid", "expires": timestamp}`, this should be cached immediately.
+
+### Request a token to **/register**
+Send an HTTP request to /auth with the following headers:
+* user-agent (must contain the user application key)
+* username (will eventually support any auth id field, including email or platform id, for now only supports username)
+* password
+* email
+
+Will return 200 if successful, or 400 if unsuccesful.
 
 ## client->server messages
 
