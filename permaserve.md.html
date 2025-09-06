@@ -38,25 +38,42 @@ Send an HTTP request to /auth with the following headers:
 Will return 200 if successful, or 400 if unsuccesful.
 
 ## client->server messages
-
+     <div class="admonition note">
+     Take these properties and their types seriously. Any message sent to the server with an invalid or incorrect datatype, missing required field, or missing type field altogether will result in an IMMEDIATE DISCONNECTION under protocol violation 1002.
+     </div>
 ### `ping`
      <div class="admonition note">
      Not to be confused with server->client ping which is a heartbeat, and expects the client to relay the server's timestamp instead of the other way around.
      </div>
-
+This message prompts the server to respond with a type `ack` message containing the timestamp of the received ping message.
 Fields | Required | Type | Description
 --- | --- | --- | ---
-target | no | string | The id of the entity to update (if empty, will infer "self")
-x | yes | number | The x coordinate of the position
-y | yes | number | The y coordinate of the position
-z | yes | number | The z coordinate of the position
+type | yes | "ping" | The message type
+timestamp | yes | number | The client-relative timestamp. Will be echoed. If this is sent improperly or as incorrect type, the server will not respond.
 Example
 ```
-type=setposition
-x=123
-y=456
-z=789
+type=ping
+timestamp=123456789
 ```
+Which is responded to by the server with
+```
+type=ack
+message=ping
+timestamp=123456789
+```
+
+### `pong`
+Response to a server `ping` message. Must echo the timestamp field of the received ping message.
+Fields | Required | Type | Description
+--- | --- | --- | ---
+type | yes | "pong" | The message type
+timestamp | yes | number | The timestamp provided by the server's ping message. If this is sent improperly or as incorrect type, the server will disconnect the client.
+Example
+```
+type=pong
+timestamp=123456789
+```
+This message must be sent immediately upon receipt of a server `ping` message, or the client connection will be forcefully terminated as a timeout violation.
 
 ### `set_position`
      <div class="admonition note">
@@ -152,7 +169,20 @@ pz=789
 
 ## server->client messages
 
-### `sync`
+### `ping`
+Heartbeat message, expects the client to immediately upon receipt respond with a type `pong` message containing the timestamp of the received ping message.
+Fields | Type | Description
+--- | --- | ---
+type | "ping" | The message type to differentiate responses from inbound updates
+timestamp | number | The server timestamp in milliseconds from server start. Not meaningful to client. Must be included as-is in response or client will be disconnected.
+
+### `ack`
+Acknowledgment/Inverted heartbeat message, sent as a response to `ping` message from client. May also be used as a response to other POST-like messages from the client in the future, hence the message field.
+Fields | Type | Description
+--- | --- | ---
+type | "ack" | The message type to differentiate responses from inbound updates
+message | "ping"... | The type of message that the server is acknowledging, e.g. "ping" for a ping message
+timestamp | number | The number provided by the client's initial `ping` message.
 
 <style class="fallback">body{visibility:hidden}</style><script>markdeepOptions={tocStyle:'medium'};</script>
 <!-- Markdeep: --><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>
