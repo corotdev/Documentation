@@ -49,7 +49,7 @@ This message prompts the server to respond with a type `ack` message containing 
 Fields | Required | Type | Description
 --- | --- | --- | ---
 type | yes | "ping" | The message type
-timestamp | yes | number | The client-relative timestamp. Will be echoed. If this is sent improperly or as incorrect type, the server will not respond.
+timestamp | yes | `number` | The client-relative timestamp. Will be echoed. If this is sent improperly or as incorrect type, the server will not respond.
 Example
 ```
 type=ping
@@ -84,10 +84,10 @@ This message must be sent immediately upon receipt of a server `ping` message, o
 
 Fields | Required | Type | Description
 --- | --- | --- | ---
-target | no | string | The id of the entity to update (if empty, will infer "self")
-x | yes | number | The x coordinate of the position
-y | yes | number | The y coordinate of the position
-z | yes | number | The z coordinate of the position
+target | no | `string` | The id of the entity to update (if empty, will infer "self")
+x | yes | `number` | The x coordinate of the position
+y | yes | `number` | The y coordinate of the position
+z | yes | `number` | The z coordinate of the position
 
 #### Broadcast:
 
@@ -117,8 +117,8 @@ gameobject=player gameobject
 
 Fields | Required | Type | Description
 --- | --- | --- | ---
-username | yes | string | The username of the account
-password | yes | string | The password of the account
+username | yes | `string` | The username of the account
+password | yes | `string` | The password of the account
 
 #### Response:
 
@@ -126,8 +126,8 @@ Fields | Type | Description
 --- | --- | --- | ---
 type | "ack" | The message type to differentiate responses from inbound updates
 message | "auth" | The type of message that this response responds to
-authed | boolean | Whether the authentication succeeded or not
-auth | uuidv4 | Authtoken for client to remember (sent only if successful, currently has no effect)
+authed | `boolean` | Whether the authentication succeeded or not
+auth | `uuidv4` | Authtoken for client to remember (sent only if successful, currently has no effect)
 
 
 Example
@@ -147,16 +147,16 @@ auth=
 ### `update`
 Fields | Required | Type | Description
 --- | --- | --- | ---
-target | yes | string | The id of the entity to update (if empty, will infer "self")
-px | no | double (meters) | The ∆x change in coordinate of the position
-py | no | double (meters) | The ∆y change in coordinate of the position
-pz | no | double (meters) | The ∆z change in coordinate of the position
-rx | no | double (deg) | The new rotational position around the x axis
-ry | no | double (deg) | The new rotational position around the y axis
-rz | no | double (deg) | The new rotational position around the z axis
-sx | no | double | The new scale of the entity
-sy | no | double | The new scale of the entity
-sz | no | double | The new scale of the entity
+target | yes | `string` | The id of the entity to update (if empty, will infer "self")
+px | no | `double` (meters) | The ∆x change in coordinate of the position
+py | no | `double` (meters) | The ∆y change in coordinate of the position
+pz | no | `double` (meters) | The ∆z change in coordinate of the position
+rx | no | `double` (deg) | The new rotational position around the x axis
+ry | no | `double` (deg) | The new rotational position around the y axis
+rz | no | `double` (deg) | The new rotational position around the z axis
+sx | no | `double` | The new scale of the entity
+sy | no | `double` | The new scale of the entity
+sz | no | `double` | The new scale of the entity
 
 Example
 ```
@@ -174,7 +174,8 @@ Heartbeat message, expects the client to immediately upon receipt respond with a
 Fields | Type | Description
 --- | --- | ---
 type | "ping" | The message type to differentiate responses from inbound updates
-timestamp | number | The server timestamp in milliseconds from server start. Not meaningful to client. Must be included as-is in response or client will be disconnected.
+timestamp | `number` | The server timestamp offset in milliseconds from server start. Not meaningful to client. Must be included as-is in response or client will be disconnected.
+ping | `number` or `undefined` | The average of the last 10 round-trip pings as calculated by the server for the client, or undefined if there is no ping data available.
 
 ### `ack`
 Acknowledgment/Inverted heartbeat message, sent as a response to `ping` message from client. May also be used as a response to other POST-like messages from the client in the future, hence the message field.
@@ -182,7 +183,7 @@ Fields | Type | Description
 --- | --- | ---
 type | "ack" | The message type to differentiate responses from inbound updates
 message | "ping"... | The type of message that the server is acknowledging, e.g. "ping" for a ping message
-timestamp | number | The number provided by the client's initial `ping` message.
+timestamp | `number` | The number provided by the client's initial `ping` message.
 
 <style class="fallback">body{visibility:hidden}</style><script>markdeepOptions={tocStyle:'medium'};</script>
 <!-- Markdeep: --><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>
