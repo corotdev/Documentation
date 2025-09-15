@@ -144,10 +144,10 @@ authed=false
 auth=
 ```
 
-### `update`
+### `update_entity`
 Fields | Required | Type | Description
 --- | --- | --- | ---
-target | yes | `string` | The id of the entity to update (if empty, will infer "self")
+target | yes | `string` | The id of the wight/entity to update (if empty, will infer "self")
 px | no | `double` (meters) | The ∆x change in coordinate of the position
 py | no | `double` (meters) | The ∆y change in coordinate of the position
 pz | no | `double` (meters) | The ∆z change in coordinate of the position
@@ -160,11 +160,42 @@ sz | no | `double` | The new scale of the entity
 
 Example
 ```
-type=setposition
+type=update_entity
 target=self
 px=123
 py=456
 pz=789
+```
+
+### `send_state`
+Request the relevant nearby game object state from the server. The server will respond with a type `state` message containing lists of all fields filled entities, players, stalls, and worlds that the server deems relevant to the client.
+<div class="admonition note">
+This message should be used sparingly, as it is expensive for the server to process. The client should cache all game objects it receives from the server and only request updates for objects it does not already know about by passing their UUIDs in the `exclude` field. The server will not send any game objects whose UUIDs are included in the `exclude` list.
+Try to only send this message when absolutely necessary, such as on initial connection or when the client has moved a significant distance.
+Eventually, the server will automatically send state updates to the client as needed, making this message obsolete.
+</div>
+#### Request:
+
+Fields | Required | Type | Description
+--- | --- | --- | ---
+exclude | no | `string[]` | A list of UUIDs of game objects the client already knows about and does not need to be sent again.
+
+#### Response:
+
+see `state` message in server->client messages below
+
+
+Example
+```
+type=send_state
+exclude=uuid1,uuid2,uuid3
+```
+-->
+```
+entities=[{entity1},{entity2},...]
+players=[{player1},{player2},...]
+stalls=[{stall1},{stall2},...]
+worlds=[{world1},{world2},...]
 ```
 
 ## server->client messages
@@ -184,6 +215,66 @@ Fields | Type | Description
 type | "ack" | The message type to differentiate responses from inbound updates
 message | "ping"... | The type of message that the server is acknowledging, e.g. "ping" for a ping message
 timestamp | `number` | The number provided by the client's initial `ping` message.
+
+### `state`
+Response to a `send_state` message from the client, or sent automatically by the server when the client needs content. Contains lists of all relevant game objects the server deems relevant to the client.
+Fields | Type | Description
+--- | --- | ---
+entities | `entityJSON[]` or `[]` | A list of all entities the server deems relevant to the client, or an empty list if none are relevant.
+players | `playerJSON[]` or `[]` | A list of all players the server deems relevant to the client, or an empty list if none are relevant.
+stalls | `stallJSON[]` or `[]` | A list of all stalls the server deems relevant to the client, or an empty list if none are relevant.
+worlds | `worldJSON[]` or `[]` | A list of all worlds the server deems relevant to the client, or an empty list if none are relevant.
+
+The shape of these objects is as follows:
+* position
+Fields | Type | Description
+--- | --- | ---
+x | `number` | The x coordinate in meters
+y | `number` | The y coordinate in meters
+z | `number` | The z coordinate in meters
+rx | `number` | The rotation around the x axis in degrees
+ry | `number` | The rotation around the y axis in degrees
+rz | `number` | The rotation around the z axis in degrees
+sx | `number` | The scale along the x axis
+sy | `number` | The scale along the y axis
+sz | `number` | The scale along the z axis
+* entityJSON
+Fields | Type | Description
+--- | --- | ---
+id | `string` | The UUID of the entity
+world | `number` | The ID of the world the entity is in (0 for galactic)
+anchor | `string` or `undefined` | The UUID of the anchor of the entity, or null if the entity is not anchored to anything.
+type | `string` | The type of the entity, e.g. "npc", "item", etc.
+position | `position` | The positional, rotational, and scalar information of the entity in world space, in meters, degrees, and scale units respectively.
+properties | `{[key: string]: any}` | A dictionary of additional properties specific to the entity type.
+* playerJSON
+Fields | Type | Description
+--- | --- | ---
+username | `string` | The username of the player. Use this as the ID field.
+world | `number` | The ID of the world the player is in.
+anchor | `string` or `undefined` | The UUID of the anchor of the player, or null if the player is not anchored to anything.
+position | `position` | The positional, rotational, and scalar information of the player in world space, in meters, degrees, and scale units respectively.
+properties | `{[key: string]: any}` | A dictionary of additional properties specific to the player.
+* stallJSON
+Fields | Type | Description
+--- | --- | ---
+id | `string` | The UUID of the stall
+world | `number` | The ID of the world the stall is in.
+type | `string` | The type of the stall, e.g. "counter", "sign", etc.
+position | `position` | The positional, rotational, and scalar information of the stall in world space, in meters, degrees, and scale units respectively.
+properties | `{[key: string]: any}` | A dictionary of additional properties specific to the stall.
+* worldJSON
+Fields | Type | Description
+--- | --- | ---
+id | `number` | The ID of the world
+name | `string` | The name of the world
+stalls | `string[]` | A list of UUIDs of stalls in the world.
+entities | `string[]` | A list of UUIDs of entities in the world.
+players | `string[]` | A list of usernames of players in the world.
+portal | `string[]` | An array of (almost always) one item, the UUID of the entity in galactic space that serves as the portal to this world. May be more than one in rare cases such as wormholes.
+properties | `{[key: string]: any}` | A dictionary of additional properties specific to the world.
+
+
 
 <style class="fallback">body{visibility:hidden}</style><script>markdeepOptions={tocStyle:'medium'};</script>
 <!-- Markdeep: --><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>
