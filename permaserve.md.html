@@ -216,11 +216,17 @@ Fields | Type | Description
 type | "ack" | The message type to differentiate responses from inbound updates
 message | "ping"... | The type of message that the server is acknowledging, e.g. "ping" for a ping message
 timestamp | `number` | The number provided by the client's initial `ping` message.
-
-### `state`
-Response to a `send_state` message from the client, or sent automatically by the server when the client needs content. Contains lists of all relevant game objects the server deems relevant to the client.
+### `welcome`
+Sent automatically by the server upon initial connection to the client, contains basic information about the player and server state.
 Fields | Type | Description
 --- | --- | ---
+type | "welcome" | The message type to differentiate responses from inbound updates
+self | `playerJSON` | The player object representing the client itself.
+### `state`
+Sent only in response to a `send_state` message from the client, or sent automatically by the server when the client needs content. Contains lists of all relevant game objects the server deems relevant to the client.
+Fields | Type | Description
+--- | --- | ---
+type | "state" | The message type to differentiate responses from inbound updates
 entities | `entityJSON[]` or `[]` | A list of all entities the server deems relevant to the client, or an empty list if none are relevant.
 players | `playerJSON[]` or `[]` | A list of all players the server deems relevant to the client, or an empty list if none are relevant.
 stalls | `stallJSON[]` or `[]` | A list of all stalls the server deems relevant to the client, or an empty list if none are relevant.
@@ -233,9 +239,15 @@ Fields | Type | Description
 x | `number` | The x coordinate in meters (for world space) or Megameters (for galactic space)
 y | `number` | The y coordinate in meters (for world space) or Megameters (for galactic space)
 z | `number` | The z coordinate in meters (for world space) or Megameters (for galactic space)
+vx | `number` | The velocity along the x axis in meters per second
+vy | `number` | The velocity along the y axis in meters per second
+vz | `number` | The velocity along the z axis in meters per second
 rx | `number` | The rotation around the x axis in degrees
 ry | `number` | The rotation around the y axis in degrees
 rz | `number` | The rotation around the z axis in degrees
+rvx | `number` | The rotational velocity around the x axis in degrees per second
+rvy | `number` | The rotational velocity around the y axis in degrees per second
+rvz | `number` | The rotational velocity around the z axis in degrees per second
 sx | `number` | The scale along the x axis (1 is default)
 sy | `number` | The scale along the y axis (1 is default)
 sz | `number` | The scale along the z axis (1 is default)
