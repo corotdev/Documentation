@@ -233,8 +233,8 @@ stalls | `stallJSON[]` or `[]` | A list of all stalls the server deems relevant 
 worlds | `worldJSON[]` or `[]` | A list of all worlds the server deems relevant to the client, or an empty list if none are relevant.
 
 ## Data structures
-
 The shape of these objects is as follows:
+### position
 * position
 Fields | Type | Description
 --- | --- | ---
@@ -253,7 +253,7 @@ rvz | `number` | The rotational velocity around the z axis in degrees per second
 sx | `number` | The scale along the x axis (1 is default)
 sy | `number` | The scale along the y axis (1 is default)
 sz | `number` | The scale along the z axis (1 is default)
-
+### entityJSON
 * entityJSON
 Fields | Type | Description
 --- | --- | ---
@@ -263,7 +263,7 @@ anchor | `string` or `undefined` | The UUID of the anchor of the entity, or null
 type | `string` | The type of the entity, e.g. "npc", "item", etc.
 position | `position` | The positional, rotational, and scalar information of the entity in world space, in meters, degrees, and scale units respectively.
 properties | `{[key: string]: any}` | A dictionary of additional properties specific to the entity type.
-
+### playerJSON
 * playerJSON
 Fields | Type | Description
 --- | --- | ---
@@ -272,7 +272,7 @@ world | `number` | The ID of the world the player is in.
 anchor | `string` or `undefined` | The UUID of the anchor of the player, or null if the player is not anchored to anything.
 position | `position` | The positional, rotational, and scalar information of the player in world space, in meters, degrees, and scale units respectively.
 properties | `{[key: string]: any}` | A dictionary of additional properties specific to the player.
-
+### stallJSON
 * stallJSON
 Fields | Type | Description
 --- | --- | ---
@@ -281,7 +281,7 @@ world | `number` | The ID of the world the stall is in.
 type | `string` | The type of the stall, e.g. "counter", "sign", etc.
 position | `position` | The positional, rotational, and scalar information of the stall in world space, in meters, degrees, and scale units respectively.
 properties | `{[key: string]: any}` | A dictionary of additional properties specific to the stall.
-
+### worldJSON
 * worldJSON
 Fields | Type | Description
 --- | --- | ---
