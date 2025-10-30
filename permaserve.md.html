@@ -77,7 +77,7 @@ This message must be sent immediately upon receipt of a server `ping` message, o
 
 ### `set_position`
      <div class="admonition note">
-     This message will soon be deprecated in favor of `update`
+     This message will soon be deprecated in favor of `update_self`
      </div>
 
 #### Request:
@@ -144,10 +144,9 @@ authed=false
 auth=
 ```
 
-### `update_entity`
+### `update_self`
 Fields | Required | Type | Description
 --- | --- | --- | ---
-target | yes | `string` | The id of the wight/entity to update (if empty, will infer "self")
 px | no | `double` (meters) | The ∆x change in coordinate of the position
 py | no | `double` (meters) | The ∆y change in coordinate of the position
 pz | no | `double` (meters) | The ∆z change in coordinate of the position
