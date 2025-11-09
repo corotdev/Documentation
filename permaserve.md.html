@@ -235,26 +235,41 @@ worlds | `worldJSON[]` or `[]` | A list of all worlds the server deems relevant 
 ## Data structures
 The shape of these objects is as follows:
 ### position
-Fields | Scope | Type | Description
+
+#### database model
+Fields | Type | Description
 --- | --- | --- | ---
-orbitalMode | client, server, db | `boolean` | The positioning mode, `FALSE` for CARTESIAN for direct x,y,z coordinates or `TRUE` for ORBITAL for orbit-based positioning.
-origin | client, server, db | `string?` | The UUID of the anchor this position is relative to/orbiting around, or undefined/null if the position is untethered in galactic space.
-x | client, server, db | `number` | The x coordinate in meters (for world space) or Megameters (for galactic space).
-y | client, server, db | `number` | The y coordinate in meters (for world space) or Megameters (for galactic space)
-z | client, server, db | `number` | The z coordinate in meters (for world space) or Megameters (for galactic space)
-vx | client, server, db | `number?` | The velocity along the x axis in meters per second
-vy | client, server, db | `number?` | The velocity along the y axis in meters per second
-vz | client, server, db | `number?` | The velocity along the z axis in meters per second
-rx | client, server, db | `number` | The rotation around the x axis in degrees
-ry | client, server, db | `number` | The rotation around the y axis in degrees
-rz | client, server, db | `number` | The rotation around the z axis in degrees
-rvx | client, server, db | `number?` | The rotational velocity around the x axis in degrees per second
-rvy | client, server, db | `number?` | The rotational velocity around the y axis in degrees per second
-rvz | client, server, db | `number?` | The rotational velocity around the z axis in degrees per second
-or | client, server, db | `number` | The orbit radius in meters (for world space) or Megameters (for galactic space)
+origin | `string?` | The UUID of the anchor this position is defined relative to, or undefined/unset if the position is untethered in galactic space (in which case the position specified matches the galactic coordinates).
+x | `number` | The x coordinate in meters (if origin is set) or Megameters (for galactic space, to reduce error)
+y | `number` | The y coordinate in meters (if origin is set) or Megameters (for galactic space, to reduce error)
+z | `number` | The z coordinate in meters (if origin is set) or Megameters (for galactic space, to reduce error)
+vx | `number?` | The velocity along the x axis in meters per second
+vy | `number?` | The velocity along the y axis in meters per second
+vz | `number?` | The velocity along the z axis in meters per second
+rx | `number` | The rotation around the x axis in degrees
+ry | `number` | The rotation around the y axis in degrees
+rz | `number` | The rotation around the z axis in degrees
+rvx | `number?` | The rotational velocity around the x axis in degrees per second
+rvy | `number?` | The rotational velocity around the y axis in degrees per second
+rvz | `number?` | The rotational velocity around the z axis in degrees per second
+or | `number` | The orbit radius in meters (for world space) or Megameters (for galactic space)
 sx | `number` | The scale along the x axis (1 is default)
 sy | `number` | The scale along the y axis (1 is default)
 sz | `number` | The scale along the z axis (1 is default)
+
+#### client + server
+Fields | Type | Description
+--- | --- | --- | ---
+origin | `string?` | The UUID of the anchor this position is defined relative to, or undefined/unset if the position is untethered in galactic space (in which case the position specified matches the galactic coordinates).
+p | `vector3<Float>` | The coordinates in meters (if origin is set) or Megameters (for galactic space, to reduce error)
+v | `vector3<Float>` | The velocity in meters per second
+r | `vector3<Float>` | The rotation in degrees
+rv | `vector3<Float>` | The rotational velocity in degrees per second
+s | `vector3<Float>` | The scale (1 is default)
+<div class="admonition note">
+vector3<Float> is serialized into JSON as {x: $, y: $, z: $} with three components of x y and z keys, with Float values of type Number replacing the dollar signs.
+</div>
+@@index([x,y,z])
 ### entityJSON
 Fields | Type | Description
 --- | --- | ---
