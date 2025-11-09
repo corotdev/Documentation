@@ -235,26 +235,27 @@ worlds | `worldJSON[]` or `[]` | A list of all worlds the server deems relevant 
 ## Data structures
 The shape of these objects is as follows:
 ### position
-* position
-Fields | Type | Description
---- | --- | ---
-x | `number` | The x coordinate in meters (for world space) or Megameters (for galactic space)
-y | `number` | The y coordinate in meters (for world space) or Megameters (for galactic space)
-z | `number` | The z coordinate in meters (for world space) or Megameters (for galactic space)
-vx | `number` | The velocity along the x axis in meters per second
-vy | `number` | The velocity along the y axis in meters per second
-vz | `number` | The velocity along the z axis in meters per second
-rx | `number` | The rotation around the x axis in degrees
-ry | `number` | The rotation around the y axis in degrees
-rz | `number` | The rotation around the z axis in degrees
-rvx | `number` | The rotational velocity around the x axis in degrees per second
-rvy | `number` | The rotational velocity around the y axis in degrees per second
-rvz | `number` | The rotational velocity around the z axis in degrees per second
+Fields | Scope | Type | Description
+--- | --- | --- | ---
+orbitalMode | client, server, db | `boolean` | The positioning mode, `FALSE` for CARTESIAN for direct x,y,z coordinates or `TRUE` for ORBITAL for orbit-based positioning.
+origin | client, server, db | `string?` | The UUID of the anchor this position is relative to/orbiting around, or undefined/null if the position is untethered in galactic space.
+x | client, server, db | `number` | The x coordinate in meters (for world space) or Megameters (for galactic space).
+y | client, server, db | `number` | The y coordinate in meters (for world space) or Megameters (for galactic space)
+z | client, server, db | `number` | The z coordinate in meters (for world space) or Megameters (for galactic space)
+vx | client, server, db | `number?` | The velocity along the x axis in meters per second
+vy | client, server, db | `number?` | The velocity along the y axis in meters per second
+vz | client, server, db | `number?` | The velocity along the z axis in meters per second
+rx | client, server, db | `number` | The rotation around the x axis in degrees
+ry | client, server, db | `number` | The rotation around the y axis in degrees
+rz | client, server, db | `number` | The rotation around the z axis in degrees
+rvx | client, server, db | `number?` | The rotational velocity around the x axis in degrees per second
+rvy | client, server, db | `number?` | The rotational velocity around the y axis in degrees per second
+rvz | client, server, db | `number?` | The rotational velocity around the z axis in degrees per second
+or | client, server, db | `number` | The orbit radius in meters (for world space) or Megameters (for galactic space)
 sx | `number` | The scale along the x axis (1 is default)
 sy | `number` | The scale along the y axis (1 is default)
 sz | `number` | The scale along the z axis (1 is default)
 ### entityJSON
-* entityJSON
 Fields | Type | Description
 --- | --- | ---
 id | `string` | The UUID of the entity
@@ -264,7 +265,6 @@ type | `string` | The type of the entity, e.g. "npc", "item", etc.
 position | `position` | The positional, rotational, and scalar information of the entity in world space, in meters, degrees, and scale units respectively.
 properties | `{[key: string]: any}` | A dictionary of additional properties specific to the entity type.
 ### playerJSON
-* playerJSON
 Fields | Type | Description
 --- | --- | ---
 username | `string` | The username of the player. Use this as the ID field.
@@ -273,7 +273,6 @@ anchor | `string` or `undefined` | The UUID of the anchor of the player, or null
 position | `position` | The positional, rotational, and scalar information of the player in world space, in meters, degrees, and scale units respectively.
 properties | `{[key: string]: any}` | A dictionary of additional properties specific to the player.
 ### stallJSON
-* stallJSON
 Fields | Type | Description
 --- | --- | ---
 id | `string` | The UUID of the stall
@@ -282,7 +281,6 @@ type | `string` | The type of the stall, e.g. "counter", "sign", etc.
 position | `position` | The positional, rotational, and scalar information of the stall in world space, in meters, degrees, and scale units respectively.
 properties | `{[key: string]: any}` | A dictionary of additional properties specific to the stall.
 ### worldJSON
-* worldJSON
 Fields | Type | Description
 --- | --- | ---
 id | `number` | The ID of the world
