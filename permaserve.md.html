@@ -237,6 +237,8 @@ The shape of these objects is as follows:
 ### position
 
 #### database model
+<div class="admonition note">
+This model describes how the data is stored in the database. To see how it is implemented in code, scroll down to the heading `client + server` </div>
 Fields | Type | Description
 --- | --- | --- | ---
 origin | `string?` | The UUID of the anchor this position is defined relative to, or undefined/unset if the position is untethered in galactic space (in which case the position specified matches the galactic coordinates).
@@ -256,6 +258,7 @@ or | `number` | The orbit radius in meters (for world space) or Megameters (for 
 sx | `number` | The scale along the x axis (1 is default)
 sy | `number` | The scale along the y axis (1 is default)
 sz | `number` | The scale along the z axis (1 is default)
+@@index([x,y,z])
 
 #### client + server
 Fields | Type | Description
@@ -267,9 +270,9 @@ r | `vector3<Float>` | The rotation in degrees
 rv | `vector3<Float>` | The rotational velocity in degrees per second
 s | `vector3<Float>` | The scale (1 is default)
 <div class="admonition note">
-vector3<Float> is serialized into JSON as {x: $, y: $, z: $} with three components of x y and z keys, with Float values of type Number replacing the dollar signs.
+vector3<Float> is serialized into JSON as `{x: $, y: $, z: $}`, with three components of x y and z keys, and with Float values of type Number replacing the dollar signs.
 </div>
-@@index([x,y,z])
+
 ### entityJSON
 Fields | Type | Description
 --- | --- | ---
