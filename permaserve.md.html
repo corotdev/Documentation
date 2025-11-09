@@ -241,29 +241,28 @@ The shape of these objects is as follows:
 This model describes how the data is stored in the database. To see how it is implemented in code, scroll down to the heading `client + server` </div>
 Fields | Type | Description
 --- | --- | --- | ---
-origin | `string?` | The UUID of the anchor this position is defined relative to, or undefined/unset if the position is untethered in galactic space (in which case the position specified matches the galactic coordinates).
-x | `number` | The x coordinate in meters (if origin is set) or Megameters (for galactic space, to reduce error)
-y | `number` | The y coordinate in meters (if origin is set) or Megameters (for galactic space, to reduce error)
-z | `number` | The z coordinate in meters (if origin is set) or Megameters (for galactic space, to reduce error)
-vx | `number?` | The velocity along the x axis in meters per second
-vy | `number?` | The velocity along the y axis in meters per second
-vz | `number?` | The velocity along the z axis in meters per second
-rx | `number` | The rotation around the x axis in degrees
-ry | `number` | The rotation around the y axis in degrees
-rz | `number` | The rotation around the z axis in degrees
-rvx | `number?` | The rotational velocity around the x axis in degrees per second
-rvy | `number?` | The rotational velocity around the y axis in degrees per second
-rvz | `number?` | The rotational velocity around the z axis in degrees per second
-or | `number` | The orbit radius in meters (for world space) or Megameters (for galactic space)
-sx | `number` | The scale along the x axis (1 is default)
-sy | `number` | The scale along the y axis (1 is default)
-sz | `number` | The scale along the z axis (1 is default)
+origin | `String` or `"global"` | The UUID of the anchor this position is defined relative to, or `"global"` if the position is untethered in galactic space (in which case the position specified matches the galactic coordinates).
+x | `Float` | The x coordinate in meters (if origin is set) or Megameters (for galactic space, to reduce error)
+y | `Float` | The y coordinate in meters (if origin is set) or Megameters (for galactic space, to reduce error)
+z | `Float` | The z coordinate in meters (if origin is set) or Megameters (for galactic space, to reduce error)
+vx | `Float` | The velocity along the x axis in meters per second
+vy | `Float` | The velocity along the y axis in meters per second
+vz | `Float` | The velocity along the z axis in meters per second
+rx | `Float` | The rotation around the x axis in degrees
+ry | `Float` | The rotation around the y axis in degrees
+rz | `Float` | The rotation around the z axis in degrees
+rvx | `Float` | The rotational velocity around the x axis in degrees per second
+rvy | `Float` | The rotational velocity around the y axis in degrees per second
+rvz | `Float` | The rotational velocity around the z axis in degrees per second
+sx | `Float` | The scale along the x axis (1 is default)
+sy | `Float` | The scale along the y axis (1 is default)
+sz | `Float` | The scale along the z axis (1 is default)
 @@index([x,y,z])
 
 #### client + server
 Fields | Type | Description
 --- | --- | --- | ---
-origin | `string?` | The UUID of the anchor this position is defined relative to, or undefined/unset if the position is untethered in galactic space (in which case the position specified matches the galactic coordinates).
+origin | `string?` | The UUID of the anchor this position is defined relative to, or `undefined` if the position is untethered in galactic space (in which case the position specified matches the galactic coordinates).
 p | `vector3<Float>` | The coordinates in meters (if origin is set) or Megameters (for galactic space, to reduce error)
 v | `vector3<Float>` | The velocity in meters per second
 r | `vector3<Float>` | The rotation in degrees
