@@ -241,7 +241,7 @@ The shape of these objects is as follows:
 This model describes how the data is stored in the database. To see how it is implemented in code, scroll down to the heading `client + server` </div>
 Fields | Type | Description
 --- | --- | --- | ---
-origin | `String` or `"global"` | The UUID of the anchor this position is defined relative to, or `"global"` if the position is untethered in galactic space (in which case the position specified matches the galactic coordinates).
+parent | `String` or `"origin"` | The UUID of the anchor this position is defined relative to, or `"origin"` if the position is untethered in galactic space (in which case the position specified matches the galactic coordinates).
 x | `Float` | The x coordinate in meters (if origin is set) or Megameters (for galactic space, to reduce error)
 y | `Float` | The y coordinate in meters (if origin is set) or Megameters (for galactic space, to reduce error)
 z | `Float` | The z coordinate in meters (if origin is set) or Megameters (for galactic space, to reduce error)
@@ -262,7 +262,7 @@ sz | `Float` | The scale along the z axis (1 is default)
 #### client + server
 Fields | Type | Description
 --- | --- | --- | ---
-origin | `string?` | The UUID of the anchor this position is defined relative to, or `undefined` if the position is untethered in galactic space (in which case the position specified matches the galactic coordinates).
+parent | `string?` | The UUID of the anchor this position is defined relative to, or `undefined` if the position is untethered in galactic space (in which case the position specified matches the galactic coordinates).
 p | `vector3<Float>` | The coordinates in meters (if origin is set) or Megameters (for galactic space, to reduce error)
 v | `vector3<Float>` | The velocity in meters per second
 r | `vector3<Float>` | The rotation in degrees
