@@ -2,40 +2,199 @@
 
                           **Permaserve API**
 
+## Protocol Version
+
+The current protocol version is **0.2**. This version uses semantic versioning:
+- **Major version** changes indicate breaking protocol changes (incompatible message formats)
+- **Minor version** changes indicate backward-compatible additions (new optional fields or message types)
+
+Both client and server MUST negotiate protocol compatibility during handshake.
+
 ## Connection protocol
 
 ### Connect to the active ip **/handshake** and pass as headers the following
 
 * user-agent (must contain the user application key)
+* protocol-version (the protocol version in format X.Y where X is the major version and Y is the minor version)
 * client-version (the version of the client in the format X.Y where X is the major version and Y is the minor version [patch excluded]))
 * username (will eventually support any auth id field, including email or platform id, for now only supports username)
 * token (generate via /auth)
 
+#### Handshake Response
+The server will respond with one of the following:
+* **101 Switching Protocols** - Handshake successful, WebSocket connection established
+* **426 Upgrade Required** - Client protocol version incompatible (response includes `X-Required-Protocol-Version` header with minimum supported version)
+* **401 Unauthorized** - Invalid token or authentication failure
+* **400 Bad Request** - Missing required headers or malformed request
+
+On successful handshake (101), the server will send a `welcome` message as the first WebSocket message.
+
 ### Request a token to **/auth**
-Send an HTTP request to /auth with the following headers:
+Send an HTTP POST request to /auth with the following headers:
 * user-agent (must contain the user application key)
+* client-version (the version of the client in format X.Y)
 * username (will eventually support any auth id field, including email or platform id, for now only supports username)
 * password
 
-Server will respond with one of these responses:
-200 if login is successful
-500 if the login failed but the server should retain the cached auth
-401 if login failed AND the client should prompt the user to re-enter their login
-400 if the client version is outdated and should install the latest update
-and if successful, the response body will look like this:
-```
+#### Response Codes and Bodies:
+
+**200 OK** - Authentication successful
+```json
 {
-"token": "6c5f93c9-c25f-4573-8ab0-76e7fbd5a3b4"
+  "token": "6c5f93c9-c25f-4573-8ab0-76e7fbd5a3b4",
+  "username": "corotdev",
+  "expires_at": 1704758400000
 }
 ```
+
+**401 Unauthorized** - Invalid credentials, client should prompt user to re-enter
+```json
+{
+  "error": "INVALID_CREDENTIALS",
+  "message": "Username or password incorrect",
+  "retry_allowed": true
+}
+```
+
+**400 Bad Request** - Malformed request (missing headers, invalid format)
+```json
+{
+  "error": "BAD_REQUEST",
+  "message": "Missing required header: username",
+  "field": "username"
+}
+```
+
+**426 Upgrade Required** - Client version outdated, must update
+```json
+{
+  "error": "CLIENT_OUTDATED",
+  "message": "Client version 0.1 is no longer supported. Minimum version: 0.2",
+  "minimum_version": "1.5",
+  "download_url": "https://example.com/download"
+}
+```
+
+**429 Too Many Requests** - Rate limit exceeded
+```json
+{
+  "error": "RATE_LIMIT_EXCEEDED",
+  "message": "Too many authentication attempts. Please wait before trying again.",
+  "retry_after": 60
+}
+```
+
+**503 Service Unavailable** - Server temporarily unavailable (maintenance, overload)
+```json
+{
+  "error": "SERVICE_UNAVAILABLE",
+  "message": "Authentication service temporarily unavailable. Please try again later.",
+  "retry_after": 120
+}
+```
+
+**Note:** The old 500 status code for "server should retain cached auth" has been deprecated. Clients should implement local token caching and only re-authenticate when receiving 401 or on token expiration.
 ### Request a token to **/register**
-Send an HTTP request to /auth with the following headers:
+Send an HTTP POST request to /register with the following headers:
 * user-agent (must contain the user application key)
+* client-version (the version of the client in format X.Y)
 * username (will eventually support any auth id field, including email or platform id, for now only supports username)
 * password
 * email
 
-Will return 200 if successful, or 400 if unsuccesful.
+#### Response Codes and Bodies:
+
+**201 Created** - Registration successful (changed from 200 to follow HTTP semantics)
+```json
+{
+  "token": "6c5f93c9-c25f-4573-8ab0-76e7fbd5a3b4",
+  "username": "newuser",
+  "expires_at": 1704758400000
+}
+```
+
+**400 Bad Request** - Malformed request or validation error
+```json
+{
+  "error": "VALIDATION_ERROR",
+  "message": "Username already exists",
+  "field": "username"
+}
+```
+Additional validation error codes in `error` field:
+- `USERNAME_TAKEN` - Username already registered
+- `EMAIL_TAKEN` - Email already registered
+- `INVALID_EMAIL` - Email format invalid
+- `WEAK_PASSWORD` - Password doesn't meet security requirements
+- `INVALID_USERNAME` - Username contains invalid characters or is too short/long
+
+**426 Upgrade Required** - Client version outdated
+```json
+{
+  "error": "CLIENT_OUTDATED",
+  "message": "Client version 0.1 is no longer supported. Minimum version: 0.2",
+  "minimum_version": "0.2",
+  "download_url": "https://github.com/corotdev/pvdl/releases/latest"
+}
+```
+
+**429 Too Many Requests** - Rate limit exceeded
+```json
+{
+  "error": "RATE_LIMIT_EXCEEDED",
+  "message": "Too many registration attempts. Please wait before trying again.",
+  "retry_after": 300
+}
+```
+
+**503 Service Unavailable** - Server temporarily unavailable
+```json
+{
+  "error": "SERVICE_UNAVAILABLE",
+  "message": "Registration service temporarily unavailable. Please try again later.",
+  "retry_after": 120
+}
+```
+
+## Connection State Machine
+
+The protocol enforces a state machine for connection lifecycle:
+
+State | Allowed Client Messages | Server Behavior
+--- | --- | ---
+**CONNECTING** | None | Handshake in progress
+**CONNECTED** | All messages allowed | Normal operation, full message processing
+**AUTHENTICATED** | All messages allowed | (Future state when auth is enforced)
+**DISCONNECTING** | `disconnect` only | Grace period before close
+**CLOSED** | None | Connection terminated
+
+#### State Transitions
+
+```
+CONNECTING --[handshake success]--> CONNECTED
+CONNECTED --[client disconnect]--> DISCONNECTING
+DISCONNECTING --[5 seconds]--> CLOSED
+CONNECTED --[timeout/error]--> CLOSED
+```
+
+Messages sent in wrong state result in immediate disconnection or are ignored.
+
+## Message Size and Rate Limits
+
+### Size Limits
+
+* **Maximum message size**: 16 KB (16,384 bytes) per WebSocket message
+* **Messages exceeding limit**: Rejected with `error` code 1007, counts as 1 violation point
+* **Recommendation**: Clients should batch updates efficiently to stay under limit
+
+### Rate Limits
+
+* **Maximum message rate**: 100 messages per second (averaged over 10-second window)
+* **Burst allowance**: Up to 200 messages in 1 second, but must average to ≤100/sec over 10 seconds
+* **Rate limit exceeded**: Server sends `error` code 1004, subsequent messages within same second are dropped
+* **Critical rate violation**: >500 messages in 1 second results in immediate disconnection (code 1008)
+
+These limits prevent accidental client bugs or malicious behavior from degrading server performance.
 
 ## client->server messages
      <div class="admonition note">
@@ -64,85 +223,26 @@ timestamp=123456789
 
 ### `pong`
 Response to a server `ping` message. Must echo the timestamp field of the received ping message.
+
 Fields | Required | Type | Description
 --- | --- | --- | ---
 type | yes | "pong" | The message type
 timestamp | yes | number | The timestamp provided by the server's ping message. If this is sent improperly or as incorrect type, the server will disconnect the client.
+
 Example
 ```
 type=pong
 timestamp=123456789
 ```
-This message must be sent immediately upon receipt of a server `ping` message, or the client connection will be forcefully terminated as a timeout violation.
 
-### `set_position`
-     <div class="admonition note">
-     This message will soon be deprecated in favor of `update_self`
-     </div>
+#### Heartbeat Timing Requirements
 
-#### Request:
+* **Server ping interval**: Server sends `ping` messages every **30 seconds** of connection inactivity (no messages from client).
+* **Client pong deadline**: Client MUST respond with `pong` within **10 seconds** of receiving a `ping`.
+* **Grace period**: After timeout, server waits an additional **5 seconds** grace period before disconnecting.
+* **Disconnection**: If no `pong` is received within 15 seconds total (10s deadline + 5s grace), server disconnects with code 1001 (Going Away) and reason "Heartbeat timeout".
 
-Fields | Required | Type | Description
---- | --- | --- | ---
-target | no | `string` | The id of the entity to update (if empty, will infer "self")
-x | yes | `number` | The x coordinate of the position
-y | yes | `number` | The y coordinate of the position
-z | yes | `number` | The z coordinate of the position
-
-#### Broadcast:
-
-Fields | Required | Type | Description
---- | --- | --- | ---
-type | "set_position" |
-gameobject | gameobject | the updated player gameobject
-Example
-```
-type=setposition
-x=123
-y=456
-z=789
-```
--->
-Global broadcast
-```
-type=set_position
-gameobject=player gameobject
-```
-### `auth`
-     <div class="admonition note">
-     This message is temporarily not checked against the real user database. Extra handling for rejections will need to be added once this is done.
-     </div>
-
-#### Request:
-
-Fields | Required | Type | Description
---- | --- | --- | ---
-username | yes | `string` | The username of the account
-password | yes | `string` | The password of the account
-
-#### Response:
-
-Fields | Type | Description
---- | --- | --- | ---
-type | "ack" | The message type to differentiate responses from inbound updates
-message | "auth" | The type of message that this response responds to
-authed | `boolean` | Whether the authentication succeeded or not
-auth | `uuidv4` | Authtoken for client to remember (sent only if successful, currently has no effect)
-
-
-Example
-```
-type=auth
-username=corotdev
-password=verycarroty
-```
--->
-```
-type=ack
-message=auth
-authed=false
-auth=
-```
+This allows clients on slow or unstable connections to maintain their session while detecting truly dead connections.
 
 ### `update_self`
 Fields | Required | Type | Description
@@ -168,46 +268,25 @@ dy=456
 dz=789
 ```
 
-### `send_state`
-Request the relevant nearby game object state from the server. The server will respond with a type `state` message containing lists of all fields filled entities, players, stalls, and worlds that the server deems relevant to the client.
-<div class="admonition note">
-This message should be used sparingly, as it is expensive for the server to process. The client should cache all game objects it receives from the server and only request updates for objects it does not already know about by passing their UUIDs in the `exclude` field. The server will not send any game objects whose UUIDs are included in the `exclude` list.
-Try to only send this message when absolutely necessary, such as on initial connection or when the client has moved a significant distance.
-Eventually, the server will automatically send state updates to the client as needed, making this message obsolete.
-</div>
-#### Request:
-
-Fields | Required | Type | Description
---- | --- | --- | ---
-exclude | no | `string[]` | A list of UUIDs of game objects the client already knows about and does not need to be sent again.
-
-#### Response:
-
-see `state` message in server->client messages below
-
-
-Example
-```
-type=send_state
-exclude=uuid1,uuid2,uuid3
-```
--->
-```
-entities=[{entity1},{entity2},...]
-players=[{player1},{player2},...]
-stalls=[{stall1},{stall2},...]
-worlds=[{world1},{world2},...]
-```
-
 ## server->client messages
 
 ### `ping`
-Heartbeat message, expects the client to immediately upon receipt respond with a type `pong` message containing the timestamp of the received ping message.
+Heartbeat message sent every 30 seconds of connection inactivity. Client must respond with `pong` within 10 seconds or risk disconnection.
+
 Fields | Type | Description
 --- | --- | ---
 type | "ping" | The message type to differentiate responses from inbound updates
 timestamp | `number` | The server timestamp offset in milliseconds from server start. Not meaningful to client. Must be included as-is in response or client will be disconnected.
 ping | `number` or `undefined` | The average of the last 10 round-trip pings as calculated by the server for the client, or undefined if there is no ping data available.
+deadline | `number` | Timestamp (milliseconds since epoch) by which the client must respond with `pong`. Calculated as current time + 10000ms.
+
+Example:
+```
+type=ping
+timestamp=123456789
+ping=45.2
+deadline=1704672010000
+```
 
 ### `ack`
 Acknowledgment/Inverted heartbeat message, sent as a response to `ping` message from client. May also be used as a response to other POST-like messages from the client in the future, hence the message field.
@@ -216,21 +295,106 @@ Fields | Type | Description
 type | "ack" | The message type to differentiate responses from inbound updates
 message | "ping"... | The type of message that the server is acknowledging, e.g. "ping" for a ping message
 timestamp | `number` | The number provided by the client's initial `ping` message.
+
 ### `welcome`
 Sent automatically by the server upon initial connection to the client, contains basic information about the player and server state.
+
 Fields | Type | Description
 --- | --- | ---
 type | "welcome" | The message type to differentiate responses from inbound updates
 self | `playerJSON` | The player object representing the client itself.
 ### `state`
-Sent only in response to a `send_state` message from the client, or sent automatically by the server when the client needs content. Contains lists of all relevant game objects the server deems relevant to the client.
+Sent automatically by the server when the client needs updated game object information. The server maintains a cache of which game objects each client already knows about and only sends new or updated objects that the client hasn't received yet. This message is triggered by client movement, world changes, or when nearby objects are created/modified.
+<div class="admonition note">
+The server tracks which game objects (entities, players, stalls, and worlds) have been sent to each client. Only objects that are newly relevant or have been updated since the client last received them will be included in state updates. This eliminates the need for clients to manually manage exclusion lists or request state.
+</div>
 Fields | Type | Description
 --- | --- | ---
 type | "state" | The message type to differentiate responses from inbound updates
-entities | `entityJSON[]` or `[]` | A list of all entities the server deems relevant to the client, or an empty list if none are relevant.
-players | `playerJSON[]` or `[]` | A list of all players the server deems relevant to the client, or an empty list if none are relevant.
-stalls | `stallJSON[]` or `[]` | A list of all stalls the server deems relevant to the client, or an empty list if none are relevant.
-worlds | `worldJSON[]` or `[]` | A list of all worlds the server deems relevant to the client, or an empty list if none are relevant.
+entities | `entityJSON[]` or `[]` | A list of entities newly relevant to the client or that have been updated, or an empty list if none.
+players | `playerJSON[]` or `[]` | A list of players newly relevant to the client or that have been updated, or an empty list if none.
+stalls | `stallJSON[]` or `[]` | A list of stalls newly relevant to the client or that have been updated, or an empty list if none.
+worlds | `worldJSON[]` or `[]` | A list of worlds newly relevant to the client or that have been updated, or an empty list if none.
+
+Example
+```
+type=state
+entities=[{entity1},{entity2}]
+players=[{player1}]
+stalls=[]
+worlds=[{world1}]
+```
+
+## Reconnection and Session Recovery
+
+### Connection Loss Handling
+
+When a WebSocket connection is lost (network failure, timeout, server restart), clients should implement the following reconnection strategy:
+
+#### Reconnection Backoff Algorithm
+
+Attempt | Delay Before Retry | Notes
+--- | --- | ---
+1 | Immediate (0s) | First reconnection attempt is immediate
+2 | 1 second | Quick retry for transient issues
+3 | 2 seconds |
+4 | 4 seconds |
+5 | 8 seconds |
+6+ | 16 seconds | Maximum backoff cap, repeat indefinitely or until user intervention
+
+**Backoff calculation**: `min(2^(attempt-1), 16)` seconds
+
+**Jitter**: Add random jitter of ±20% to prevent thundering herd when server recovers.
+
+### Session Recovery
+
+The server maintains session state for **5 minutes** after unexpected disconnection (timeout, network error). Session is identified by auth token.
+
+#### Session State Preservation
+
+During the 5-minute window, the server preserves:
+* Player position and world
+* Accumulated game state
+
+#### Reconnection with Session Resume
+
+To resume a session, include the `resume-session` header during handshake:
+
+```
+resume-session: true
+```
+
+**Server responses:**
+
+* **Session resumed successfully**: Connection proceeds normally and client receives current state
+* **Session expired**: Client starts with fresh connection and receives full initial state
+
+### Graceful Disconnection
+
+When client intentionally disconnects, it should send a `disconnect` message before closing WebSocket:
+
+```
+type=disconnect
+reason=user_requested
+```
+
+This immediately clears server-side session state and prevents unnecessary 5-minute session preservation.
+
+Server will respond with WebSocket close code 1000 (Normal Closure).
+
+## WebSocket Close Codes
+
+When disconnecting, the server uses standard WebSocket close codes:
+
+Code | Name | When Used
+--- | --- | ---
+1000 | Normal Closure | Client sent disconnect message or graceful shutdown
+1001 | Going Away | Heartbeat timeout or server shutdown
+1002 | Protocol Error | Protocol violation (invalid message format, missing required fields, incorrect types)
+1008 | Policy Violation | Critical violation (malicious payload, extreme rate limit)
+1011 | Internal Error | Unexpected server error during message processing
+
+Clients can inspect the close code to determine reconnection strategy (e.g., don't auto-reconnect on 1002, do reconnect on 1001).
 
 ## Data structures
 The shape of these objects is as follows:
